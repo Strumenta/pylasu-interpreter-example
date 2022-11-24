@@ -23,6 +23,7 @@ class InterpreterTest(unittest.TestCase):
         product = m.add_entity('Product')
         product.add_int_feature('value')
         project = m.add_entity('Project')
+        project.add_entity_feature('client', 'Client')
         return m
 
     def test_creation(self):
@@ -111,4 +112,20 @@ class InterpreterTest(unittest.TestCase):
         interpreter.run_script(result.root)
         self.assertEqual(["Value of Product #2 is: 850"], interpreter.output)
 
+    def test_set_stmt_and_get_feature_interactions(self):
+        module = self.simple_module()
+        interpreter = Interpreter(module, verbose=False)
 
+        script_code = '''
+        create Client        
+        create Project
+        create Client
+        set name of Client #3 to 'Paris SA'
+        set client of Project #2 to Client #3
+        set name of Client #1 to name of client of Project #2
+        '''
+        self.assertEqual([], interpreter.output)
+        result = ScriptPylasuParser().parse(script_code)
+        self.assertEqual([], result.issues)
+        issues = interpreter.run_script(result.root)
+        self.assertEqual([], issues)

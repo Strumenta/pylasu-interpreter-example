@@ -46,6 +46,13 @@ class Entity(Node):
         self.features.append(f)
         return f
 
+    def add_entity_feature(self, name, entity) -> Feature:
+        f = Feature()
+        f.name = name
+        f.type = EntityRefType(entity=ReferenceByName(name=entity))
+        self.features.append(f)
+        return f
+
 
 @dataclass
 class Feature(Node):
@@ -79,4 +86,4 @@ class BooleanType(Type):
 
 @dataclass
 class EntityRefType(Type):
-    entity: ReferenceByName = field(default=None)
+    entity: ReferenceByName[Entity] = field(default=None)
