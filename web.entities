@@ -1,0 +1,13 @@
+module Entities {
+
+    entity Project {
+        name: string
+        client: Client
+    }
+
+    entity Client {
+        name: string
+        address: string
+    }
+
+}
