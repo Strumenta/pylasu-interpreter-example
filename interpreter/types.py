@@ -4,8 +4,9 @@ from pylasu.model import Node
 from pylasu.validation import Issue, IssueType
 from pylasu.support import extension_method
 
-from interpreter.entities_parser.entities_ast import Type, Entity, StringType, IntegerType, EntityRefType
-from interpreter.script_parser.script_ast import ReferenceExpression, GetInstanceExpression, GetFeatureValueExpression
+from interpreter.entities_parser.entities_ast import Type, Entity, StringType, IntegerType, EntityRefType, Feature
+from interpreter.script_parser.script_ast import ReferenceExpression, GetInstanceExpression, GetFeatureValueExpression, \
+    StringLiteralExpression, IntLiteralExpression, DivisionExpression
 
 
 @dataclass
@@ -73,5 +74,13 @@ def calc_type(node: Node, issues: list[Issue]) -> RType:
             issues.append(Issue(type=IssueType.SEMANTIC, message=f"Unresolved feature {node.feature.name},"
                                                                  f" unable to calculate type of {node}"))
             return None
+    elif isinstance(node, Feature):
+        return RType.from_type(node.type)
+    elif isinstance(node, StringLiteralExpression):
+        return RStringType()
+    elif isinstance(node, IntLiteralExpression):
+        return RIntegerType()
+    elif isinstance(node, DivisionExpression):
+        return RIntegerType()
     else:
         raise Exception("Unable to calculate type for %s" % (str(node)))

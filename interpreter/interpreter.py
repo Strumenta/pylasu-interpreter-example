@@ -105,7 +105,18 @@ class Interpreter:
             if not resolved:
                 issues.append(Issue(type=IssueType.SEMANTIC, message="Cannot find entity named %s" % t.entity.name))
 
-    def __resolve__(self, script: Script, issues: list[Issue]):
+    def __check_types__(self, script: Script, issues: list[Issue]):
+        for s in script.walk_descendants(restrict_to=SetStatement):
+            feature_type = calc_type(s.feature.referred, issues)
+            value_type = calc_type(s.value, issues)
+            if feature_type is not None and value_type is not None:
+                if not feature_type.can_be_assigned(value_type):
+                    issues.append(Issue(type=IssueType.SEMANTIC,
+                                        position=s.position,
+                                        message="Cannot assign %s (type %s) to feature %s (type %s)"
+                                                % (str(s.value), str(value_type), str(s.feature.referred), str(feature_type))))
+
+    def __resolve_script__(self, script: Script, issues: list[Issue]):
 
         # Resolving references to elements outside the script
         for s in script.walk_descendants(restrict_to=GetInstanceExpression):
@@ -134,6 +145,7 @@ class Interpreter:
             if not resolved:
                 issues.append(Issue(type=IssueType.SEMANTIC, message="Unable to resolve feature reference %s in %s. Candidates: %s" % (s.feature.name, str(s),
                                                                                       str(entity.features))))
+
         for s in script.walk_descendants(walker=walk_leaves_first, restrict_to=GetFeatureValueExpression):
             t = calc_type(s.instance, issues)
             if t is None:
@@ -150,7 +162,8 @@ class Interpreter:
 
     def run_script(self, script) -> list[Issue]:
         issues = []
-        self.__resolve__(script, issues)
+        self.__resolve_script__(script, issues)
+        self.__check_types__(script, issues)
         symbol_table = {}
         for s in script.statements:
             self.execute_statement(s, symbol_table, issues)
