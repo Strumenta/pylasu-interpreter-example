@@ -1,29 +1,33 @@
 from antlr4 import InputStream, CommonTokenStream
-from pylasu.validation.validation import Result, IssueType
+from antlr4.error.ErrorListener import ErrorListener
+from pylasu.model import Position, Point
+from pylasu.validation.validation import Result, Issue, IssueType
 
 from entity_parser.AntlrEntityLexer import AntlrEntityLexer
 from entity_parser.AntlrEntityParser import AntlrEntityParser
 from interpreter.MyListener import MyListener
+from interpreter.entities_parser.entities_ast import Module
+from interpreter.script_parser.script_parsetree_converter import to_ast
+from script_parser.AntlrScriptLexer import AntlrScriptLexer
+from script_parser.AntlrScriptParser import AntlrScriptParser
 
-from interpreter.entities_parser.entities_parsetree_converter import to_ast
 
-
-class EntitiesPylasuParser:
+class ScriptPylasuParser:
 
     def parse(self, code: str) -> Result:
         issues = []
 
         input = InputStream(code)
 
-        lexer = AntlrEntityLexer(input)
+        lexer = AntlrScriptLexer(input)
         lexer.removeErrorListeners()
         lexer.addErrorListener(MyListener(issues, IssueType.LEXICAL))
 
         token_stream = CommonTokenStream(lexer)
-        parser = AntlrEntityParser(token_stream)
+        parser = AntlrScriptParser(token_stream)
         parser.removeErrorListeners()
         parser.addErrorListener(MyListener(issues, IssueType.SYNTACTIC))
-        parse_tree = parser.module()
+        parse_tree = parser.script()
 
         ast = parse_tree.to_ast(issues)
         ast.assign_parents()

@@ -19,6 +19,6 @@ LCRLY: '{';
 RCRLY: '}';
 
 
-ID: [A-Z]+;
+ID: [a-zA-Z][a-zA-Z0-9_]*;
 
 WS: [ \r\n\t]+ -> channel(HIDDEN);
