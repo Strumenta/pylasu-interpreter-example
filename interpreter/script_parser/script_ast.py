@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from pylasu.model import Node
 from pylasu.model.naming import ReferenceByName
 
-from interpreter.entities_parser.entities_ast import Entity
+from interpreter.entities_parser.entities_ast import Entity, Feature
 
 
 @dataclass
@@ -41,7 +41,7 @@ class CreateStatement(Statement):
     For example, create Project       # name=None
              or, create Project as c  # name=c
     """
-    entity: ReferenceByName = field(default=None)
+    entity: ReferenceByName[Entity] = field(default=None)
     name: str = field(default=None)
 
     def __hash__(self) -> int:
@@ -54,13 +54,13 @@ class SetStatement(Statement):
     For example, set name of Project #1 to 'Foo'
     """
     instance: Expression = field(default=None)
-    feature: ReferenceByName = field(default=None)
+    feature: ReferenceByName[Feature] = field(default=None)
     value: Expression = field(default=None)
 
 
 @dataclass
 class ReferenceExpression(Expression):
-    what: ReferenceByName = field(default=None)
+    what: ReferenceByName[CreateStatement] = field(default=None)
 
 
 @dataclass
@@ -68,14 +68,14 @@ class GetInstanceExpression(Expression):
     """
     For example, Project #1 or Project #(1+1)
     """
-    entity: ReferenceByName = field(default=None)
+    entity: ReferenceByName[Entity] = field(default=None)
     id: Expression = field(default=None)
 
 
 @dataclass
 class GetFeatureValueExpression(Expression):
     instance: Expression = field(default=None)
-    feature: ReferenceByName = field(default=None)
+    feature: ReferenceByName[Feature] = field(default=None)
 
 
 @dataclass
