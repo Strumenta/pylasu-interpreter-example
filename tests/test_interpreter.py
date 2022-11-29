@@ -25,6 +25,8 @@ class InterpreterTest(unittest.TestCase):
         project.add_str_feature('name')
         project.add_entity_feature('client', 'Client')
 
+        m.assign_parents()
+
         return m
 
     def test_creation(self):

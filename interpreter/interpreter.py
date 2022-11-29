@@ -131,6 +131,8 @@ class Interpreter:
         # Resolving references to elements inside the script
         for e in script.walk_descendants(restrict_to=ReferenceExpression):
             e.what.try_to_resolve(script.walk_descendants(restrict_to=CreateStatement))
+            if not resolved:
+                issues.append(Issue(type=IssueType.SEMANTIC, message="Cannot find variable named %s" % e.what.name))
 
         # Resolutions involving type calculation
         for s in script.walk_descendants(restrict_to=SetStatement):
